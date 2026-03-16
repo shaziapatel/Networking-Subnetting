@@ -1,0 +1,303 @@
+Edge-Router
+
+
+configure terminal
+hostname Edge-Router
+enable secret class
+ip domain-name patel-lab.com
+no ip domain lookup
+service password-encryption
+username SSHadmin secret class
+crypto key generate rsa
+!1024
+
+
+line console 0
+password cisco
+logging synchronous
+!exec-timeout 6 0
+login
+
+line vty 0 4
+password cisco
+!exec-timeout 6 0
+transport input ssh
+login
+
+banner motd $ WARNING Authorized Users Only! $
+
+Edge-Router(config)#int g0/0/0
+*Mar 1 0:14:50.57: %SSH-5-ENABLED: SSH 1.99 has been enabled
+Edge-Router(config-if)#ip address 10.0.0.1 255.255.255.0
+Edge-Router(config-if)#description router int g0/0/0
+Edge-Router(config-if)#no shut
+
+
+Edge-Router(config-subif)#int s0/1/0
+Edge-Router(config-if)#ip address 209.165.201.2 255.255.255.252
+Edge-Router(config-if)#description serail to ISP
+Edge-Router(config-if)#no shut
+==================================
+Sw-C
+
+configure terminal
+hostname Sw-C
+enable secret class
+ip domain-name acad.pt
+no ip domain lookup
+service password-encryption
+username admin secret C1sco123!
+crypto key generate rsa
+!1024
+
+
+line console 0
+password cisco
+logging synchronous
+!exec-timeout 6 0
+login
+
+line vty 0 15
+password cisco
+logging synchronous
+!exec-timeout 6 0
+transport input ssh
+login
+
+Sw-C(config)#vlan 99
+Sw-C(config-vlan)#name NetAdmin
+Sw-C(config-vlan)#vlan 40
+Sw-C(config-vlan)#name B3
+Sw-C(config-vlan)#vlan 50 
+Sw-C(config-vlan)#name B4
+Sw-C(config-vlan)#vlan 60
+Sw-C(config-vlan)#name B5
+
+
+Sw-C(config)#int range f0/1-5
+Sw-C(config-if-range)#switchport mode access
+Sw-C(config-if-range)#switchport access vlan 40
+Sw-C(config-if-range)#no shut
+Sw-C(config-if-range)#int range f0/6-10
+Sw-C(config-if-range)#switchport mode access
+Sw-C(config-if-range)#switchport access vlan 50
+Sw-C(config-if-range)#no shut
+Sw-C(config-if-range)#int range f0/11-15
+Sw-C(config-if-range)#switchport mode access
+Sw-C(config-if-range)#switchport access vlan 60
+Sw-C(config-if-range)#no shut
+
+Sw-C(config-if)#int f0/24
+Sw-C(config-if)#switchport mode access
+Sw-C(config-if)#switchport access vlan 99
+Sw-C(config-if)#no shut
+Sw-C(config-if)#int vlan 99
+Sw-C(config-if)#ip address 10.0.99.18 255.255.255.240
+Sw-C(config-if)#no shut
+
+Sw-C(config)#int range f0/16-23
+Sw-C(config-if-range)#shutdown
+
+Sw-C(config)# interface g0/1
+Sw-C(config-if)#switchport mode trunk
+Sw-C(config-if)#switchport trunk native vlan 99
+Sw-C(config-if)#switchport trunk allowed vlan 40,50,60
+Sw-C(config-if)#switchport nonegotiate
+
+Sw-C(config)#ip default-gateway 10.0.99.17
+===================================
+L3-SW1
+
+L3-SW1(config)#vlan 10
+L3-SW1(config-vlan)#name B1F1
+L3-SW1(config-vlan)#vlan 20
+L3-SW1(config-vlan)#name B1F2
+L3-SW1(config-vlan)#vlan 30
+L3-SW1(config-vlan)#name B1F4
+L3-SW1(config-vlan)#
+L3-SW1(config-vlan)#vlan 99
+L3-SW1(config-vlan)#name NetAdmin
+L3-SW1(config-vlan)#exit
+L3-SW1(config)#
+L3-SW1(config)#int range g1/0/1-2
+L3-SW1(config-if-range)#switchport mode access
+L3-SW1(config-if-range)#switchport access vlan 10
+L3-SW1(config-if-range)#no shut
+L3-SW1(config-if-range)#
+L3-SW1(config-if-range)#int range g1/0/3-4
+L3-SW1(config-if-range)#switchport mode access
+L3-SW1(config-if-range)#switchport access vlan 20
+L3-SW1(config-if-range)#no shut
+L3-SW1(config-if-range)#
+
+int vlan 10
+ip address 10.0.10.1 255.255.255.0
+int vlan 20
+ip address 10.0.20.1 255.255.255.0
+int vlan 30
+ip address 10.0.30.1 255.255.255.0
+int vlan 99
+ip address 10.0.99.2 255.255.255.240
+
+MSW-1(config)#int g1/1/1
+MSW-1(config-if)#no switchport
+MSW-1(config-if)#ip address 10.0.0.2 255.255.255.0
+MSW-1(config-if)#no shut
+MSW-1(config)#ip routing
+===========================================
+Sw-A
+
+Sw-A(config)#vlan 10
+Sw-A(config-vlan)#name B1F1
+Sw-A(config-vlan)#vlan 20
+Sw-A(config-vlan)#name B1F2
+Sw-A(config-vlan)#vlan 30
+Sw-A(config-vlan)#name B1F4
+Sw-A(config-vlan)#
+
+Sw-A(config-if-range)#int range F0/7-10
+Sw-A(config-if-range)#switchport mode access
+Sw-A(config-if-range)#switchport access vlan 10
+Sw-A(config-if-range)#no shut
+Sw-A(config-if-range)#
+Sw-A(config-if-range)#int range F0/11-15
+Sw-A(config-if-range)#switchport mode access
+Sw-A(config-if-range)#switchport access vlan 20
+Sw-A(config-if-range)#no shut
+Sw-A(config-if-range)#
+Sw-A(config-if-range)#int range F0/16-24
+Sw-A(config-if-range)#switchport mode access
+Sw-A(config-if-range)#switchport access vlan 30
+Sw-A(config-if-range)#no shut
+
+
+========================================
+Sw-B
+
+Sw-B(config)#
+Sw-B(config)#vlan 10
+Sw-B(config-vlan)#name B1F1
+Sw-B(config-vlan)#vlan 20
+Sw-B(config-vlan)#name B1F2
+Sw-B(config-vlan)#vlan 30
+Sw-B(config-vlan)#name B1F4
+
+Sw-B(config-vlan)#int range F0/7-10
+Sw-B(config-if-range)#switchport mode access
+Sw-B(config-if-range)#switchport access vlan 10
+Sw-B(config-if-range)#int range F0/11-15
+Sw-B(config-if-range)#switchport mode access
+Sw-B(config-if-range)#switchport access vlan 20
+Sw-B(config-if-range)#int range F0/16-24
+Sw-B(config-if-range)#switchport mode access
+Sw-B(config-if-range)#switchport access vlan 30
+Sw-B(config-if-range)#
+=============================
+Edge-Router
+
+Edge-Router(config-subif)#interface g0/0/1
+Edge-Router(config-if)#no shut
+
+interface g0/0/1.40
+encapsulation dot1q 40
+description B3
+ip address 10.0.40.1 255.255.255.0
+interface g0/0/1.50
+encapsulation dot1q 50
+description B4
+ip address 10.0.50.1 255.255.255.0
+interface g0/0/1.60
+encapsulation dot1q 60 
+description B5
+ip address 10.0.60.1 255.255.255.0
+interface g0/0/1.99
+encapsulation dot1q 99 native
+description NetAdmin Native
+ip address 10.0.99.17 255.255.255.240
+===================================
+L3-SW1
+
+interface range G1/0/1-2
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 10,20,30
+channel-group 1 mode active
+
+interface range G1/0/3-4
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 10,20,30
+channel-group 2 mode active
+====================================
+Sw-A
+
+interface range G0/1-2
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 10,20,30
+channel-group 1 mode active
+switchport nonegotiate
+
+interface range F0/5-6
+switchport mode trunk
+switchport trunk allowed vlan 10,20,30
+channel-group 3 mode active
+switchport nonegotiate
+=============================
+Sw-B
+
+interface range G0/1-2
+switchport mode trunk
+switchport trunk native vlan 99
+switchport trunk allowed vlan 10,20,30
+channel-group 2 mode active
+switchport nonegotiate
+
+interface range F0/5-6
+switchport mode trunk
+switchport trunk allowed vlan 10,20,30
+channel-group 3 mode active
+switchport nonegotiate
+====================================
+if ipv6 is using
+ipv6 unicast-routing
+
+interface g0/0/0
+description Connection to S3
+ip address 10.0.4.1 255.255.255.0
+ipv6 address fe80::2:a link-local
+ipv6 address 2001:db8:acad:4::1/64
+no shutdown
+interface g0/0/1
+description Connection to S4
+ip address 10.0.5.1 255.255.255.0
+ipv6 address fe80::2:b link-local
+ipv6 address 2001:db8:acad:5::1/64
+no shutdown
+interface s0/1/0
+description Link to R1
+ip address 10.0.3.2 255.255.255.0
+ipv6 address fe80::1:c link-local
+ipv6 address 2001:db8:acad:3::2/64
+no shutdown
+interface s0/1/1
+description Link to Internet
+ip address 209.165.200.225 255.255.255.252
+ipv6 address fe80::1:d link-local
+ipv6 address 2001:db8:feed:224::1/64
+no shutdown
+
+copy running-config startup-config
+
+show version
+
+show running-config | include password
+
+show running-config | begin vty
+
+show ip route
+
+show ip interface brief
+
+show ipv6 interface brief
+
